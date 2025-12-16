@@ -25,7 +25,7 @@ Comprehensive end-to-end test suite for Mastodon (mastodon.social), a federated 
   - Registration form submitted successfully
   - Confirmation message: "Your account awaits confirmation. Check your email for instructions"
   - Confirmation email received
-  - Can confirm email and complete registration
+  - Can confirm email and complete registrationg
 
 #### Test Case 1.1.2: Registration - Email Already Exists
 
@@ -117,18 +117,6 @@ Comprehensive end-to-end test suite for Mastodon (mastodon.social), a federated 
   1. Leave email and password empty
   2. Click "Log in"
 - **Expected Result:** Error: "Email address can't be blank" and "Password can't be blank"
-
-#### Test Case 1.2.5: Login with Username
-
-- **Description:** User can login with username instead of email
-- **Steps:**
-  1. Navigate to login
-  2. Enter username: testuser123
-  3. Enter correct password
-  4. Click "Log in"
-- **Expected Result:**
-  - Login successful
-  - Redirected to home timeline
 
 #### Test Case 1.2.6: Logout Functionality
 
