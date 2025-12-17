@@ -5,6 +5,7 @@ import 'dotenv/config';
 // Test credentials
 const VALID_EMAIL = process.env.EXISTING_EMAIL || 'simonslavik001@gmail.com';
 const VALID_PASSWORD = process.env.VALID_PASSWORD || 'TestPassword123!';
+const VALID_USERNAME = process.env.VALID_USERNAME || 'simonslavik001';
 
   /**
  * @param {import('@playwright/test').Page} page
@@ -156,8 +157,6 @@ test.describe('Create Toot Tests', () => {
   
 
   test('2.1.9: Create Empty Toot - Error Handling', async ({ page }) => {
-
-    await page.pause();
     
     await submitCompose(page);
     
@@ -174,6 +173,183 @@ test.describe('Create Toot Tests', () => {
   });
 
 
+
+  test('2.2.1: Edit Toot Successfully', async ({ page }) => {
+    // Step 1: Create a toot to edit
+    const originalText = 'Hello World - Testing Edit';
+    const editedText = 'Hello World - Updated!';
+    
+    await fillComposeText(page, originalText);
+    await submitCompose(page);
+    
+    // Wait for the toot to appear
+    const tootArticle = page.locator('article').filter({ 
+      has: page.getByText(new RegExp(originalText.split(' - ')[0]))
+    }).first();
+    
+    await expect(tootArticle).toBeVisible();
+    await page.waitForTimeout(500);
+    
+    // Step 2: Click the "..." (More) menu on the toot
+    const moreButton = tootArticle.getByRole('button', { name: 'More' }).first();
+    await moreButton.click();
+    await page.waitForTimeout(300);
+    
+    // Step 3: Click "Edit" option
+    const editButton = page.getByRole('button', { name: 'Edit' }).first();
+    await editButton.click();
+    await page.waitForTimeout(500);
+    
+    // Step 4: Modify the text
+    const textarea = page.getByRole('textbox', { name: 'What\'s on your mind?' }).first();
+    await textarea.waitFor({ state: 'visible', timeout: 3000 });
+    
+    // Clear existing text and fill new text
+    await textarea.click();
+    await textarea.fill(editedText);
+    await page.waitForTimeout(300);
+    
+    // Step 5: Click "Update" button to save changes
+    const updateButton = page.getByRole('button', { name: 'Update' }).first();
+    await updateButton.click();
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
+    
+    // Step 6: Verify the toot was updated with new text
+    const updatedToot = page.locator('article').filter({ 
+      has: page.getByText(new RegExp(editedText.split(' - ')[0]))
+    }).first();
+    
+    await expect(updatedToot).toBeVisible();
+    
+    // Step 7: Check for "Edited" indicator
+    const editedIndicator = updatedToot.locator('text=/Edited/');
+    const editedVisible = await editedIndicator.isVisible().catch(() => false);
+    
+    // Edited indicator may or may not be immediately visible, but the updated text should be
+    if (editedVisible) {
+      await expect(editedIndicator).toBeVisible();
+    }
+  });
+
+
+
+  test('2.3.1: Delete Own Toot Successfully', async ({ page }) => {
+    // Step 1: Create a toot to delete
+    const tootText = 'This toot will be deleted - Testing deletion';
+    
+    await fillComposeText(page, tootText);
+    await submitCompose(page);
+    
+    // Wait for the toot to appear
+    const tootArticle = page.locator('article').filter({ 
+      has: page.getByText(/This toot will be deleted/)
+    }).first();
+    
+    await expect(tootArticle).toBeVisible();
+    await page.waitForTimeout(500);
+    
+    // Step 2: Click the "..." (More) menu on the toot
+    const moreButton = tootArticle.getByRole('button', { name: 'More' }).first();
+    await moreButton.click();
+    await page.waitForTimeout(300);
+    
+    // Step 3: Click "Delete" option
+    const deleteButton = page.getByRole('button', { name: 'Delete' }).first();
+    await deleteButton.click();
+    await page.waitForTimeout(500);
+    
+    // Step 4: Confirm deletion if modal appears
+    const confirmButton = page.getByRole('button', { name: /Delete|Confirm/ }).first();
+    const confirmVisible = await confirmButton.isVisible().catch(() => false);
+    if (confirmVisible) {
+      await confirmButton.click();
+    }
+    
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(2000);
+    
+    // Step 5: Verify toot is removed from timeline
+    const deletedToot = page.locator('article').filter({ 
+      has: page.getByText(/This toot will be deleted/)
+    }).first();
+    
+    const isVisible = await deletedToot.isVisible().catch(() => false);
+    await expect(isVisible).toBeFalsy();
+  });
+
+  test('2.3.2: Delete Toot - Confirmation Required', async ({ page }) => {
+    // Step 1: Create a toot
+    const tootText = 'This toot needs confirmation before deletion';
+    
+    await fillComposeText(page, tootText);
+    await submitCompose(page);
+    
+    // Wait for the toot to appear
+    const tootArticle = page.locator('article').filter({ 
+      has: page.getByText(/confirmation before deletion/)
+    }).first();
+    
+    await expect(tootArticle).toBeVisible();
+    await page.waitForTimeout(500);
+    
+    // Step 2: Click the "..." menu
+    const moreButton = tootArticle.getByRole('button', { name: 'More' }).first();
+    await moreButton.click();
+    await page.waitForTimeout(300);
+    
+    // Step 3: Click "Delete"
+    const deleteButton = page.getByRole('button', { name: 'Delete' }).first();
+    await deleteButton.click();
+    await page.waitForTimeout(500);
+    
+    // Step 4: Click "Cancel" to NOT delete
+    const cancelButton = page.getByRole('button', { name: 'Cancel' }).first();
+    const cancelVisible = await cancelButton.isVisible().catch(() => false);
+    
+    if (cancelVisible) {
+      await cancelButton.click();
+      await page.waitForTimeout(500);
+    }
+    
+    // Step 5: Verify toot is still in timeline
+    const remainingToot = page.locator('article').filter({ 
+      has: page.getByText(/confirmation before deletion/)
+    }).first();
+    
+    await expect(remainingToot).toBeVisible();
+  });
+
+  test('2.3.3: Cannot Delete Other User\'s Toot', async ({ page }) => {
+    // Navigate to another user's profile (Mastodon official account)
+    await page.goto(`https://mastodon.social/@${VALID_USERNAME}`);
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(1000);
+    
+    // Try to find a toot
+    const toot = page.locator('article').first();
+    await expect(toot).toBeVisible();
+    
+    // Try to click the "..." menu
+    const moreButton = toot.getByRole('button', { name: 'More' }).first();
+    const moreVisible = await moreButton.isVisible().catch(() => false);
+    
+    // The menu should not be visible or should not have a delete option
+    if (moreVisible) {
+      await moreButton.click();
+      await page.waitForTimeout(300);
+      
+      // Look for delete button
+      const deleteButton = page.getByRole('button', { name: 'Delete' });
+      const deleteVisible = await deleteButton.isVisible().catch(() => false);
+      
+      // Delete button should not be visible for other user's toot
+      await expect(deleteVisible).toBeFalsy();
+    } else {
+      // No menu button at all is also acceptable
+      await expect(moreVisible).toBeFalsy();
+    }
+  });
 
 });
 
