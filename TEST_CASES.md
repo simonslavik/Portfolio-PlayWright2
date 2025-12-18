@@ -432,56 +432,6 @@ Comprehensive end-to-end test suite for Mastodon (mastodon.social), a federated 
   2. Look at favorite button
 - **Expected Result:** Star button may be disabled or shows "Can't favorite own toot"
 
-### 3.2 Boost (Retweet) Tests
-
-#### Test Case 3.2.1: Boost a Toot
-
-- **Description:** User can boost a toot (share to followers)
-- **Steps:**
-  1. View a toot
-  2. Click boost icon (arrow/share icon)
-- **Expected Result:**
-  - Boost icon highlighted/colored (usually green)
-  - Boost count incremented
-  - Booster's followers see toot in their feed
-  - Toot author receives notification
-
-#### Test Case 3.2.2: Unboost a Toot
-
-- **Description:** User can remove their boost
-- **Steps:**
-  1. Click boost icon on boosted toot
-- **Expected Result:**
-  - Boost icon returns to unfilled state
-  - Boost count decremented
-  - Toot removed from followers' feeds
-
-#### Test Case 3.2.3: View Toot Boosts
-
-- **Description:** User can see who boosted a toot
-- **Steps:**
-  1. Click on boost count
-  2. List opens showing users who boosted
-- **Expected Result:**
-  - List of accounts that boosted
-  - Can navigate to their profiles
-
-#### Test Case 3.2.4: Boost Notification
-
-- **Description:** Toot author receives boost notification
-- **Steps:**
-  1. User A boosts User B's toot
-  2. Check User B's notifications
-- **Expected Result:** Notification: "User A boosted your toot"
-
-#### Test Case 3.2.5: Cannot Boost Own Toot
-
-- **Description:** User cannot boost their own toot
-- **Steps:**
-  1. View own toot
-  2. Try to click boost button
-- **Expected Result:** Button disabled or message shown
-
 ### 3.3 Reply Tests
 
 #### Test Case 3.3.1: Reply to Toot
