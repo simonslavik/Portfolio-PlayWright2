@@ -1,9 +1,23 @@
 {
   "name": "portfolioproject-playwright2",
   "version": "1.0.0",
-  "description": "",
+  "description": "Comprehensive Playwright E2E test suite for Mastodon social media platform",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:report": "playwright show-report",
+    "test:ui": "playwright test --ui",
+    "test:auth": "playwright test UserLoginTests.spec.js UserRegistrationTests.spec.js",
+    "test:content": "playwright test CreateTootTests.spec.js",
+    "test:interactions": "playwright test LikeFunctionTootTests.spec.js",
+    "test:search": "playwright test SearchFunctionTests.spec.js",
+    "test:all": "playwright test",
+    "test:chrome": "playwright test --project=chromium",
+    "test:firefox": "playwright test --project=firefox",
+    "test:webkit": "playwright test --project=webkit"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/simonslavik/Portfolio-PlayWright2.git"

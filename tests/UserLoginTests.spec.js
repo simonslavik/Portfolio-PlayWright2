@@ -86,7 +86,6 @@ test.describe('User Login Tests', () => {
   
 
   test('Logout Functionality', async ({ page }) => {
-    await page.pause();
     // Fill credentials
     await fillFormField(page, 'email', VALID_EMAIL);
     await fillFormField(page, 'password', VALID_PASSWORD);
