@@ -46,7 +46,7 @@ test.describe('User Login Tests', () => {
     // Verify successful login - check for home timeline
     const currentUrl = page.url();
 
-    await expect(page).toHaveURL('https://mastodon.social/start');
+    await expect(page).toHaveURL('https://mastodon.social/home');
   });
 
   test('Login - Invalid Email', async ({ page }) => {
@@ -86,6 +86,7 @@ test.describe('User Login Tests', () => {
   
 
   test('Logout Functionality', async ({ page }) => {
+    await page.pause();
     // Fill credentials
     await fillFormField(page, 'email', VALID_EMAIL);
     await fillFormField(page, 'password', VALID_PASSWORD);
@@ -98,9 +99,9 @@ test.describe('User Login Tests', () => {
 
     // Verify successful login - check for home timeline
     const currentUrl = page.url();
-    await expect(page).toHaveURL('https://mastodon.social/start');
+    await expect(page).toHaveURL('https://mastodon.social/home');
 
-    await page.getByRole('button', { name: 'More' }).click();
+    await page.locator('button').filter({ hasText: /^More$/ }).click();
     await page.getByRole('button', { name: 'Logout' }).click();
     await page.getByRole('button', { name: 'Log out' }).click();
 
