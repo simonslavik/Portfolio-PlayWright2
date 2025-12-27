@@ -61,10 +61,10 @@ test.describe('Search Function Tests', () => {
     }
     
     // Navigate to home timeline
-    await page.goto('https://mastodon.social/home');
+    await page.goto('https://mastodon.social/home', { waitUntil: 'domcontentloaded' });
     await page.waitForLoadState('networkidle');
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(1000); // Extra wait to ensure compose box is rendered
+    await page.waitForLoadState('load');
+    await page.waitForTimeout(1500); // Extra wait to ensure page is fully loaded
   });
 
 

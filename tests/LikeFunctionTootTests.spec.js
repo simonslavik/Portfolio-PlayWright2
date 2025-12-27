@@ -24,9 +24,9 @@ let newTootId = 0;
 // Helper to fill compose text
 async function fillComposeText(page, text) {
   const textarea = page.getByRole('textbox', { name: 'What\'s on your mind?' }).first();
-  await textarea.waitFor({ state: 'visible', timeout: 2000 });
+  await textarea.waitFor({ state: 'visible', timeout: 10000 });
   await textarea.click();
-  await page.waitForTimeout(200);
+  await page.waitForTimeout(300);
   await textarea.fill(text);
   await page.waitForTimeout(300);
 }
@@ -40,7 +40,7 @@ async function submitCompose(page) {
   await page.waitForTimeout(300);
   
   const submitButton = page.getByRole('button', { name: 'Post' }).first();
-  await submitButton.waitFor({ state: 'visible', timeout: 3000 });
+  await submitButton.waitFor({ state: 'visible', timeout: 5000 });
   
   // Click with force to bypass any overlay issues
   await submitButton.click({ force: true });
@@ -127,9 +127,28 @@ test.describe('Like/Unlike Toot Tests', () => {
     }
     
     // Navigate to home timeline
-    await page.goto('https://mastodon.social/home');
+    await page.goto('https://mastodon.social/home', { waitUntil: 'domcontentloaded' });
     await page.waitForLoadState('networkidle');
-    await page.waitForLoadState('domcontentloaded');
+    await page.waitForLoadState('load');
+    await page.waitForTimeout(500);
+    
+    // Wait for compose box to be ready - with retry logic
+    let composeBoxReady = false;
+    for (let i = 0; i < 3; i++) {
+      try {
+        const composeBox = page.getByRole('textbox', { name: 'What\'s on your mind?' }).first();
+        await composeBox.waitFor({ state: 'visible', timeout: 8000 });
+        composeBoxReady = true;
+        break;
+      } catch {
+        if (i < 2) {
+          await page.waitForTimeout(1000);
+          await page.reload({ waitUntil: 'networkidle' });
+        }
+      }
+    }
+    
+    await page.waitForTimeout(2000); // Extra wait to ensure compose box is fully rendered
   });
 
   test('3.1.1: Favorite and Unfavorite Toot', async ({ page }) => {

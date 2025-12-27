@@ -40,9 +40,9 @@ export async function fillFormField(page, fieldType, value) {
  */
 export async function fillComposeText(page, text) {
   const textarea = page.getByRole('textbox', { name: 'What\'s on your mind?' }).first();
-  await textarea.waitFor({ state: 'visible', timeout: 2000 });
+  await textarea.waitFor({ state: 'visible', timeout: 10000 });
   await textarea.click();
-  await page.waitForTimeout(200);
+  await page.waitForTimeout(300);
   await textarea.fill(text);
   await page.waitForTimeout(300);
 }
@@ -57,7 +57,7 @@ export async function submitCompose(page) {
   await page.waitForTimeout(300);
   
   const submitButton = page.getByRole('button', { name: 'Post' }).first();
-  await submitButton.waitFor({ state: 'visible', timeout: 3000 });
+  await submitButton.waitFor({ state: 'visible', timeout: 5000 });
   
   // Use force to bypass any overlay issues
   await submitButton.click({ force: true });

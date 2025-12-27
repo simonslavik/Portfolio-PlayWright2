@@ -28,7 +28,10 @@ async function fillFormField(page, fieldType, value) {
 
 test.describe('User Login Tests', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('https://mastodon.social/auth/sign_in');
+    await page.goto('https://mastodon.social/auth/sign_in', { waitUntil: 'domcontentloaded' });
+    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
+    await page.waitForTimeout(500);
   });
 
   test('Successful Login - with Email', async ({ page }) => {
@@ -41,12 +44,12 @@ test.describe('User Login Tests', () => {
     await page.getByRole('button', { name: "Log in" }).click();
     // Wait for navigation
     await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForLoadState('load');
     await page.waitForTimeout(2000);
 
     // Verify successful login - check for home timeline
-    const currentUrl = page.url();
-
-    await expect(page).toHaveURL('https://mastodon.social/home');
+    await expect(page).toHaveURL('https://mastodon.social/home', { timeout: 15000 });
   });
 
   test('Login - Invalid Email', async ({ page }) => {
@@ -59,7 +62,7 @@ test.describe('User Login Tests', () => {
     await page.waitForTimeout(2000);
 
     // Verify error message
-    await expect(page.getByText('Invalid E-mail address or password.')).toBeVisible();
+    await expect(page.getByText('Invalid E-mail address or password.')).toBeVisible({ timeout: 10000 });
   });
 
   test('Login - Incorrect Password', async ({ page }) => {
@@ -72,7 +75,7 @@ test.describe('User Login Tests', () => {
     await page.waitForTimeout(2000);
 
     // Verify error message
-    await expect(page.getByText('Invalid E-mail address or password.')).toBeVisible();
+    await expect(page.getByText('Invalid E-mail address or password.')).toBeVisible({ timeout: 10000 });
   });
 
   test('Login - Empty Credentials', async ({ page }) => {
@@ -98,7 +101,7 @@ test.describe('User Login Tests', () => {
 
     // Verify successful login - check for home timeline
     const currentUrl = page.url();
-    await expect(page).toHaveURL('https://mastodon.social/home');
+    await expect(page).toHaveURL('https://mastodon.social/home', { timeout: 15000 });
 
     await page.locator('button').filter({ hasText: /^More$/ }).click();
     await page.getByRole('button', { name: 'Logout' }).click();

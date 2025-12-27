@@ -2,302 +2,483 @@
 
 ## Project Overview
 
-Comprehensive end-to-end test suite for Mastodon (mastodon.social), a federated open-source social network. Tests cover user authentication, post (toot) management, interactions, user relationships, content discovery, and Mastodon-specific features like privacy levels and content warnings.
+Comprehensive end-to-end test suite for Mastodon (mastodon.social), a federated open-source social network. Tests cover user authentication, post (toot) management, interactions, user relationships, and content discovery.
 
 ---
 
-## 1. USER REGISTRATION & LOGIN FLOWS
+## 1. USER REGISTRATION TESTS
 
-### 1.1 User Registration Tests
+### Test File: `UserRegistrationTests.spec.js`
 
-#### Test Case 1.1.1: Successful User Registration
+#### Test 1.1: Successful User Registration - Form Submission
 
+- **Test ID:** `Successful User Registration - Form Submission`
 - **Description:** User can register with valid credentials on Mastodon
+- **Steps:**
+  1. Navigate to mastodon.social registration page (`/auth/sign_up`)
+  2. Accept Rules by clicking "Accept" link
+  3. Fill in Username (unique, 1-30 characters)
+  4. Fill in E-mail address
+  5. Fill in Password (minimum 8 characters)
+  6. Confirm password
+  7. Select Date of Birth (Year, Month, Day)
+  8. Check "I have read and agree to the terms of service and privacy policy"
+  9. Click "Sign up" button
+- **Expected Result:**
+  - Registration form submitted successfully
+  - Success message: "Check your inbox"
+  - Confirmation email sent to provided email address
+- **Status:** ✅ IMPLEMENTED
+
+#### Test 1.2: Email Already Exists - Error Message
+
+- **Test ID:** `Email Already Exists - Error Message`
+- **Description:** User cannot register with existing email
 - **Steps:**
   1. Navigate to mastodon.social registration page
   2. Accept Rules
-  3. Enter valid email (e.g., newuser@test.com)
-  4. Enter username (e.g., testuser123) - must be 1-30 characters
-  5. Enter password (min 8 characters)
-  6. Check "I agree to the terms of service and privacy policy"
-  7. Click "Sign up" button
-- **Expected Result:**
-  - Registration form submitted successfully
-  - Confirmation message: "Your account awaits confirmation. Check your email for instructions"
-  - Confirmation email received
-  - Can confirm email and complete registrationg
-
-#### Test Case 1.1.2: Registration - Email Already Exists
-
-- **Description:** User cannot register with existing email
-- **Steps:**
-  1. Navigate to mastodon.social registration
-  2. Enter existing email (one already registered)
-  3. Fill other fields correctly
+  3. Fill in form with existing email address
   4. Click "Sign up"
 - **Expected Result:** Error message: "Email has already been taken"
+- **Status:** ✅ IMPLEMENTED
 
-#### Test Case 1.1.3: Registration - Invalid Email Format
+#### Test 1.3: Invalid Email Format - Error Message
 
+- **Test ID:** `Invalid Email Format - Error Message`
 - **Description:** System rejects invalid email format
 - **Steps:**
   1. Navigate to mastodon.social registration
-  2. Enter invalid email (e.g., "notanemail" or "test@")
-  3. Fill other fields
-  4. Try to submit
-- **Expected Result:** Error: "Email is invalid"
+  2. Accept Rules
+  3. Enter invalid email (e.g., "invalid-email-format")
+  4. Fill other required fields
+  5. Click "Sign up"
+- **Expected Result:** Error message for invalid email format
+- **Status:** ✅ IMPLEMENTED
 
-#### Test Case 1.1.4: Registration - Weak Password
+#### Test 1.4: Weak Password - Error Message
 
+- **Test ID:** `Weak Password - Error Message`
 - **Description:** System enforces password strength requirements
 - **Steps:**
-  1. Navigate to registration
-  2. Enter weak password (less than 8 characters, e.g., "pass")
-  3. Try to submit
-- **Expected Result:** Error: "Password is too short (minimum is 8 characters)"
+  1. Navigate to registration page
+  2. Accept Rules
+  3. Enter weak password (less than 8 characters, e.g., "pass")
+  4. Try to submit form
+- **Expected Result:** Error message indicating password is too weak/short
+- **Status:** ✅ IMPLEMENTED
 
-#### Test Case 1.1.5: Registration - Invalid Username Length
+#### Test 1.5: Invalid Username Length - Error Message
 
+- **Test ID:** `Invalid Username Length - Error Message`
 - **Description:** Username must be between 1-30 characters
 - **Steps:**
-  1. Navigate to registration
-  2. Enter username > 30 characters
-  3. Try to submit
-- **Expected Result:** Error: "Username is too long (maximum is 30 characters)"
+  1. Navigate to registration page
+  2. Accept Rules
+  3. Enter username > 30 characters
+  4. Try to submit form
+- **Expected Result:** Error message: "Username is too long"
+- **Status:** ✅ IMPLEMENTED
 
-#### Test Case 1.1.6: Registration - Missing Terms Agreement
+#### Test 1.6: Missing Terms Agreement - Button Disabled
 
+- **Test ID:** `Missing Terms Agreement - Button Disabled`
 - **Description:** User must agree to terms and privacy policy
 - **Steps:**
-  1. Fill email, username, password correctly
-  2. Leave "I agree to the terms" checkbox unchecked
-  3. Try to click "Sign up"
-- **Expected Result:** Sign up button is disabled or error: "You must agree to the terms"
+  1. Fill email, username, password, and DOB correctly
+  2. Leave "I have read and agree to the terms" checkbox unchecked
+  3. Attempt to click "Sign up" button
+- **Expected Result:** Sign up button is disabled or shows error
+- **Status:** ✅ IMPLEMENTED
 
 ---
 
-### 1.2 User Login Tests
+## 2. USER LOGIN TESTS
 
-#### Test Case 1.2.1: Successful Login
+### Test File: `UserLoginTests.spec.js`
 
-- **Description:** User logs in with correct credentials on Mastodon
+#### Test 2.1: Successful Login - with Email
+
+- **Test ID:** `Successful Login - with Email`
+- **Description:** User logs in with correct email credentials on Mastodon
 - **Steps:**
-  1. Navigate to mastodon.social login page
-  2. Enter email or username: existing_user@test.com
-  3. Enter password: CorrectPassword123
+  1. Navigate to mastodon.social login page (`/auth/sign_in`)
+  2. Enter valid email address
+  3. Enter correct password
   4. Click "Log in" button
 - **Expected Result:**
   - Login successful
   - Redirected to home timeline
-  - User profile visible in sidebar with avatar and display name
-  - Home feed shows posts from followed accounts
+  - User profile visible in sidebar
+- **Status:** ✅ IMPLEMENTED
 
-#### Test Case 1.2.2: Login - Invalid Email
+#### Test 2.2: Login - Invalid Email
 
+- **Test ID:** `Login - Invalid Email`
 - **Description:** Login fails with non-existent email
 - **Steps:**
-  1. Enter email: nonexistent@test.com
-  2. Enter any password
-  3. Click "Log in"
-- **Expected Result:** Error: "Invalid email address or password"
+  1. Navigate to login page
+  2. Enter non-existent email (e.g., nonexistent@test.com)
+  3. Enter any password
+  4. Click "Log in"
+- **Expected Result:** Error message: "Invalid email address or password"
+- **Status:** ✅ IMPLEMENTED
 
-#### Test Case 1.2.3: Login - Incorrect Password
+#### Test 2.3: Login - Incorrect Password
 
+- **Test ID:** `Login - Incorrect Password`
 - **Description:** Login fails with wrong password
 - **Steps:**
-  1. Enter correct email
-  2. Enter wrong password
-  3. Click "Log in"
-- **Expected Result:** Error: "Invalid email address or password"
+  1. Navigate to login page
+  2. Enter correct email
+  3. Enter incorrect password
+  4. Click "Log in"
+- **Expected Result:** Error message: "Invalid email address or password"
+- **Status:** ✅ IMPLEMENTED
 
-#### Test Case 1.2.4: Login - Empty Credentials
+#### Test 2.4: Login - Empty Credentials
 
+- **Test ID:** `Login - Empty Credentials`
 - **Description:** Cannot submit empty login form
 - **Steps:**
-  1. Leave email and password empty
-  2. Click "Log in"
-- **Expected Result:** Error: "Email address can't be blank" and "Password can't be blank"
+  1. Navigate to login page
+  2. Leave email and password empty
+  3. Click "Log in"
+- **Expected Result:** Error message displayed (email/password required)
+- **Status:** ✅ IMPLEMENTED
 
-#### Test Case 1.2.6: Logout Functionality
+#### Test 2.5: Logout Functionality
 
+- **Test ID:** `Logout Functionality`
 - **Description:** User can log out successfully
 - **Steps:**
-  1. Login as user
+  1. Login as user with valid credentials
   2. Click account menu (profile icon in sidebar)
   3. Click "Log out"
-  4. Confirm logout
+  4. Confirm logout if prompted
 - **Expected Result:**
   - User logged out
-  - Redirected to login page
+  - Redirected to login page or home page
   - Session cleared
+- **Status:** ✅ IMPLEMENTED
 
 ---
 
-## 2. POST MANAGEMENT (Toots)
+## 3. CREATE TOOT TESTS
 
-### 2.1 Create Toot Tests
+### Test File: `CreateTootTests.spec.js`
 
-#### Test Case 2.1.1: Create Text Toot Successfully
+#### Test 3.1: Create Text Toot Successfully
 
-- **Description:** User can create a simple text toot
+- **Test ID:** `2.1.1: Create Text Toot Successfully`
+- **Description:** User can create a simple text toot (post)
 - **Steps:**
-  1. Click "Compose" button or press C
-  2. Enter text: "This is my first toot!"
-  3. Select visibility: "Public"
-  4. Click "Toot!" button
+  1. Login to Mastodon
+  2. Navigate to home timeline
+  3. Click compose textbox "What's on your mind?"
+  4. Enter text: "This is my first toot! 🎉"
+  5. Click "Post" button
 - **Expected Result:**
   - Toot created successfully
-  - Toot appears at top of home timeline
-  - Timestamp shows current time
-  - Toot shows public globe icon
+  - Toot appears in the home timeline
+  - Text displays correctly with emoji
+- **Status:** ✅ IMPLEMENTED
 
-#### Test Case 2.1.2: Create Toot with Image
+#### Test 3.2: Create Toot with Mentions
 
-- **Description:** User can create toot with image attachment
+- **Test ID:** `2.1.5: Create Toot with Mentions`
+- **Description:** User can mention other accounts in a toot
 - **Steps:**
-  1. Click "Compose"
-  2. Click image icon
-  3. Upload image file (JPG, PNG)
-  4. Add caption text
-  5. Click "Toot!"
+  1. Login and navigate to home timeline
+  2. Click compose textbox
+  3. Type text with mentions: "Great work @mastodon @pixelfed! Love these platforms!"
+  4. Click "Post" button
 - **Expected Result:**
-  - Toot created with image
-  - Image displays correctly in timeline
-  - Alt text option available for accessibility
+  - Toot created with mentions
+  - Mention links are highlighted and clickable
+  - Mentioned users receive notifications
+- **Status:** ✅ IMPLEMENTED
 
-#### Test Case 2.1.3: Create Toot with Multiple Images
+#### Test 3.3: Create Toot with Content Warning
 
-- **Description:** User can attach up to 4 images per toot
-- **Steps:**
-  1. Click "Compose"
-  2. Upload 4 image files
-  3. Add text
-  4. Click "Toot!"
-- **Expected Result:**
-  - All 4 images uploaded and displayed
-  - Image gallery grid displayed
-  - Toot successfully created
-
-#### Test Case 2.1.4: Create Toot with Hashtags
-
-- **Description:** Toot with hashtags is properly tagged
-- **Steps:**
-  1. Click "Compose"
-  2. Enter text: "Great day! #photography #nature"
-  3. Click "Toot!"
-- **Expected Result:**
-  - Hashtags are clickable/highlighted
-  - Can search and follow hashtags
-  - Toot appears in hashtag timelines
-
-#### Test Case 2.1.5: Create Toot with Mentions
-
-- **Description:** Mentions are recognized and tagged
-- **Steps:**
-  1. Click "Compose"
-  2. Type: "Great work @username!" or use autocomplete
-  3. Click "Toot!"
-- **Expected Result:**
-  - Mention is highlighted/linked
-  - Mentioned user receives notification
-  - Mention clickable to view profile
-
-#### Test Case 2.1.6: Create Toot with Content Warning
-
+- **Test ID:** `2.1.6: Create Toot with Content Warning`
 - **Description:** User can add content warning (CW) to sensitive content
 - **Steps:**
-  1. Click "Compose"
-  2. Click "CW" button
-  3. Enter warning text: "Spoilers for movie X"
-  4. Enter toot text (hidden behind warning)
-  5. Click "Toot!"
+  1. Login and navigate to home timeline
+  2. Click compose textbox
+  3. Look for and click content warning/spoiler button (if available)
+  4. Enter warning text: "Spoilers for movie X"
+  5. Enter toot text: "This movie has an amazing twist ending!"
+  6. Click "Post" button
 - **Expected Result:**
-  - Content warning displayed
-  - Text hidden by default
-  - Users can click to reveal content
+  - Toot created with content warning
+  - Warning text displayed
+  - Full content hidden by default (users can click to reveal)
+- **Status:** ✅ IMPLEMENTED
 
-#### Test Case 2.1.7: Create Toot with Privacy Levels
+#### Test 3.4: Create Empty Toot - Error Handling
 
-- **Description:** User can select different privacy levels
-- **Steps:**
-  1. Click "Compose"
-  2. Click privacy dropdown
-  3. Select "Followers only"
-  4. Type text
-  5. Click "Toot!"
-- **Expected Result:**
-  - Toot created with correct privacy
-  - Icon shows privacy level (lock icon for followers-only)
-  - Only followers can see toot
-
-#### Test Case 2.1.8: Privacy Options - All Levels
-
-- **Description:** Test all 4 privacy levels
-- **Privacy Levels:**
-  - Public (globe icon) - visible to everyone
-  - Unlisted (people icon) - not in public timelines
-  - Followers only (lock icon) - only followers
-  - Direct (envelope icon) - only mentioned users
-- **Expected Result:** Each level properly restricts visibility
-
-#### Test Case 2.1.9: Create Empty Toot
-
+- **Test ID:** `2.1.9: Create Empty Toot - Error Handling`
 - **Description:** Cannot post without content
 - **Steps:**
-  1. Click "Compose"
-  2. Leave text blank, no images
-  3. Try to click "Toot!"
-- **Expected Result:** Error: "Toot can't be blank" or button disabled
+  1. Login and navigate to home timeline
+  2. Click "Post" button without entering any text
+- **Expected Result:** Error message displayed: "Post can't be blank"
+- **Status:** ✅ IMPLEMENTED
 
-#### Test Case 2.1.10: Toot Character Limit
+#### Test 3.5: Toot Character Limit - 500 Characters
 
-- **Description:** Mastodon supports 500 character limit (configurable)
+- **Test ID:** `2.1.10: Toot Character Limit - 500 Characters`
+- **Description:** Mastodon enforces 500 character limit per toot
 - **Steps:**
-  1. Click "Compose"
-  2. Enter text > 500 characters
+  1. Login and navigate to home timeline
+  2. Click compose textbox
+  3. Enter text exceeding 500 characters (e.g., repeated text)
 - **Expected Result:**
-  - Character counter shows remaining characters (goes negative/red)
-  - "Toot!" button disabled or shows warning
+  - Character counter displays remaining characters
+  - "Post" button becomes disabled when text exceeds 500 characters
+  - Cannot submit the post
+- **Status:** ✅ IMPLEMENTED
 
-#### Test Case 2.1.11: Draft Toot
+#### Test 3.6: Edit Toot Successfully
 
-- **Description:** User can save draft toot
+- **Test ID:** `2.2.1: Edit Toot Successfully`
+- **Description:** User can edit their own toot after creation
 - **Steps:**
-  1. Click "Compose"
-  2. Type text
-  3. Close compose without posting
-  4. Return to compose
+  1. Login and create a test toot: "Hello World - Testing Edit"
+  2. Click "..." (More) menu on the toot
+  3. Click "Edit" option
+  4. Modify text to: "Hello World - Updated!"
+  5. Click "Update" button
 - **Expected Result:**
-  - Draft is saved
-  - Can resume editing draft
-  - Drafts list available
+  - Toot updated with new text
+  - "Edited" indicator appears on toot with timestamp
+  - Edit history accessible
+- **Status:** ✅ IMPLEMENTED
+
+#### Test 3.7: Delete Own Toot Successfully
+
+- **Test ID:** `2.3.1: Delete Own Toot Successfully`
+- **Description:** User can delete their own toot
+- **Steps:**
+  1. Login and create a test toot: "This toot will be deleted - Testing deletion"
+  2. Click "..." (More) menu on the toot
+  3. Click "Delete" option
+  4. Confirm deletion if modal appears
+- **Expected Result:**
+  - Toot removed from timeline
+  - Toot no longer visible in feed
+- **Status:** ✅ IMPLEMENTED
+
+#### Test 3.8: Delete Toot - Confirmation Required
+
+- **Test ID:** `2.3.2: Delete Toot - Confirmation Required`
+- **Description:** Deletion requires user confirmation to prevent accidents
+- **Steps:**
+  1. Login and create a test toot
+  2. Click "..." menu on the toot
+  3. Click "Delete" option
+  4. Click "Cancel" to abort deletion
+- **Expected Result:**
+  - Toot remains in timeline after clicking Cancel
+  - Toot still visible in feed
+- **Status:** ✅ IMPLEMENTED
+
+#### Test 3.9: Cannot Delete Other User's Toot
+
+- **Test ID:** `2.3.3: Cannot Delete Other User's Toot`
+- **Description:** Users cannot delete toots from other accounts
+- **Steps:**
+  1. Login as user
+  2. Navigate to another user's profile
+  3. Try to access more menu ("...") on their toot
+- **Expected Result:**
+  - More menu not available or delete option not visible
+  - Cannot delete other user's content
+- **Status:** ✅ IMPLEMENTED
 
 ---
 
-### 2.2 Edit Toot Tests
+## 4. LIKE/FAVORITE TOOT TESTS
 
-#### Test Case 2.2.1: Edit Toot Successfully
+### Test File: `LikeFunctionTootTests.spec.js`
 
-- **Description:** User can edit their own toot
+#### Test 4.1: Favorite and Unfavorite Toot
+
+- **Test ID:** `3.1.1: Favorite and Unfavorite Toot`
+- **Description:** User can favorite (like) and unfavorite toots
 - **Steps:**
-  1. Click "..." menu on a toot
-  2. Click "Edit"
-  3. Modify text from "Hello" to "Hello World"
-  4. Click "Save changes"
+  1. Login to Mastodon
+  2. Create a test toot for favoriting
+  3. Click heart/star icon to favorite the toot
+  4. Verify favorite was registered
+  5. Click heart/star icon again to unfavorite
 - **Expected Result:**
-  - Toot updated with new text
-  - "Edited" label appears on toot with timestamp
-  - Edit history accessible (hover/click "Edited")
+  - Heart/star icon highlights when favorited
+  - Favorite count increases/decreases
+  - Toot can be unfavorited by clicking icon again
+- **Status:** ✅ IMPLEMENTED
 
-#### Test Case 2.2.2: Edit Toot - Change Privacy
+#### Test 4.2: View Toot Favorites
 
-- **Description:** User can change privacy level of existing toot
+- **Test ID:** `3.1.3: View Toot Favorites`
+- **Description:** User can view list of people who favorited a toot
 - **Steps:**
-  1. Click "..." on toot
-  2. Click "Edit"
-  3. Change privacy from "Public" to "Followers only"
-  4. Click "Save changes"
+  1. Login and navigate to home timeline
+  2. Find a toot with favorites
+  3. Click on the favorite count/link
 - **Expected Result:**
+  - List of users who favorited the toot is displayed
+  - Can view their profiles from favorites list
+- **Status:** ✅ IMPLEMENTED
+
+---
+
+## 5. SEARCH FUNCTION TESTS
+
+### Test File: `SearchFunctionTests.spec.js`
+
+#### Test 5.1: Search by Username
+
+- **Test ID:** `Test Case 5.1.1: Search by Username`
+- **Description:** User can search for other users by username
+- **Steps:**
+  1. Login to Mastodon
+  2. Click search box
+  3. Enter a username (e.g., "@mastodon")
+  4. View search results
+- **Expected Result:**
+  - Search results show matching users
+  - User profiles displayed with avatar and name
+  - Can click on result to view profile
+- **Status:** ✅ IMPLEMENTED
+
+#### Test 5.2: Search by Hashtag
+
+- **Test ID:** `Test Case 5.1.2: Search by Hashtag`
+- **Description:** User can search for content by hashtag
+- **Steps:**
+  1. Login to Mastodon
+  2. Click search box
+  3. Enter a hashtag (e.g., "#mastodon")
+  4. View search results
+- **Expected Result:**
+  - Search results show posts with the hashtag
+  - Hashtag timeline displayed
+  - Can follow hashtag from results
+- **Status:** ✅ IMPLEMENTED
+
+#### Test 5.3: Search by URL/Domain
+
+- **Test ID:** `Test Case 5.1.3: Search by URL/Domain`
+- **Description:** User can search by URL or domain
+- **Steps:**
+  1. Login to Mastodon
+  2. Click search box
+  3. Enter a URL (e.g., "example.com")
+  4. View search results
+- **Expected Result:**
+  - Search results show posts from that domain
+  - Results are properly filtered
+- **Status:** ✅ IMPLEMENTED
+
+#### Test 5.4: Search Results - Tabs (Posts, People, Hashtags)
+
+- **Test ID:** `Test Case 5.1.4: Search Results - Tabs (Posts, People, Hashtags)`
+- **Description:** Search results are organized in tabs by content type
+- **Steps:**
+  1. Login and perform a search
+  2. Observe tabs: "Posts", "People", "Hashtags"
+  3. Click on each tab to filter results
+- **Expected Result:**
+  - Results are categorized by type
+  - Each tab shows relevant results
+  - Can switch between tabs
+- **Status:** ✅ IMPLEMENTED
+
+#### Test 5.5: Search - No Results
+
+- **Test ID:** `Test Case 5.1.5: Search - No Results`
+- **Description:** System handles searches with no matching results
+- **Steps:**
+  1. Login to Mastodon
+  2. Search for non-existent or very unique query
+  3. Observe results
+- **Expected Result:**
+  - "No results" message displayed
+  - User can modify search query
+- **Status:** ✅ IMPLEMENTED
+
+#### Test 5.6: Search History
+
+- **Test ID:** `Test Case 5.1.6: Search History`
+- **Description:** Previous searches are saved in search history
+- **Steps:**
+  1. Login and perform several searches
+  2. Click on search box without typing
+  3. View search history suggestions
+- **Expected Result:**
+  - Previous searches shown in dropdown
+  - Can quickly re-run previous searches
+  - History can be cleared
+- **Status:** ✅ IMPLEMENTED
+
+---
+
+## Test Execution Summary
+
+### Test File Organization
+
+| Test File                       | Test Suite              | Test Count   | Status             |
+| ------------------------------- | ----------------------- | ------------ | ------------------ |
+| `UserRegistrationTests.spec.js` | User Registration Tests | 6            | ✅ Passing         |
+| `UserLoginTests.spec.js`        | User Login Tests        | 5            | ✅ Passing         |
+| `CreateTootTests.spec.js`       | Create Toot Tests       | 9            | ✅ Passing         |
+| `LikeFunctionTootTests.spec.js` | Like/Unlike Toot Tests  | 2            | ✅ Passing         |
+| `SearchFunctionTests.spec.js`   | Search Function Tests   | 6            | ✅ Passing         |
+| **TOTAL**                       | **5 Test Suites**       | **28 Tests** | **✅ All Passing** |
+
+### Running Tests
+
+**Run all tests:**
+
+```bash
+npx playwright test
+```
+
+**Run specific test file:**
+
+```bash
+npx playwright test tests/CreateTootTests.spec.js
+```
+
+**Run with UI mode:**
+
+```bash
+npx playwright test --ui
+```
+
+**View test report:**
+
+```bash
+npx playwright show-report
+```
+
+### Configuration
+
+- **Browser:** Chromium
+- **Test Timeout:** 60 seconds per test
+- **Workers:** 1 (sequential execution)
+- **Parallelization:** Disabled to avoid conflicts between test suites
+- **Retries:** 0 (local), 2 (CI only)
+
+---
+
+## Notes
+
+- Tests use real Mastodon.social instance for end-to-end testing
+- Authentication state is saved between tests using `auth.json`
+- Test data is generated dynamically (usernames, emails with timestamps)
+- Sequential execution ensures no state conflicts between test suites
   - Toot privacy updated
   - Privacy icon changes
   - Visibility appropriately restricted

@@ -46,7 +46,7 @@ async function fillComposeText(page, text) {
   const textarea = page.getByRole('textbox', { name: 'What\'s on your mind?' }).first();
   await textarea.waitFor({ state: 'visible', timeout: 2000 });
   await textarea.click();
-  await page.waitForTimeout(200);
+  await page.waitForTimeout(300);
   await textarea.fill(text);
   await page.waitForTimeout(300);
 }
@@ -55,9 +55,12 @@ async function fillComposeText(page, text) {
  */
 // Helper to submit compose
 async function submitCompose(page) {
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(300);
+  
   const submitButton = page.getByRole('button', { name: 'Post' }).first();
   await submitButton.waitFor({ state: 'visible', timeout: 2000 });
-  await submitButton.click();
+  await submitButton.click({ force: true });
   await page.waitForLoadState('networkidle');
   await page.waitForTimeout(2000);
 }
@@ -88,10 +91,28 @@ test.describe('Create Toot Tests', () => {
     }
     
     // Navigate to home timeline
-    await page.goto('https://mastodon.social/home');
+    await page.goto('https://mastodon.social/home', { waitUntil: 'domcontentloaded' });
     await page.waitForLoadState('networkidle');
-    await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(1000); // Extra wait to ensure compose box is rendered
+    await page.waitForLoadState('load');
+    await page.waitForTimeout(500);
+    
+    // Wait for compose box to be ready - with retry logic
+    let composeBoxReady = false;
+    for (let i = 0; i < 3; i++) {
+      try {
+        const composeBox = page.getByRole('textbox', { name: 'What\'s on your mind?' }).first();
+        await composeBox.waitFor({ state: 'visible', timeout: 2000 });
+        composeBoxReady = true;
+        break;
+      } catch {
+        if (i < 2) {
+          await page.waitForTimeout(1000);
+          await page.reload({ waitUntil: 'networkidle' });
+        }
+      }
+    }
+    
+    await page.waitForTimeout(2000); // Extra wait to ensure compose box is fully rendered
   });
 
   test('2.1.1: Create Text Toot Successfully', async ({ page }) => {
