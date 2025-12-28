@@ -1,39 +1,14 @@
 // @ts-check
 import { test, expect } from '@playwright/test';
+import { HomePage } from '../pages/HomePage.js';
+import { LoginPage } from '../pages/LoginPage.js';
+import { SearchPage } from '../pages/SearchPage.js';
 import 'dotenv/config';
 
 // Test credentials
-const VALID_EMAIL = process.env.EXISTING_EMAIL || 'simonslavik001@gmail.com';
-const VALID_PASSWORD = process.env.VALID_PASSWORD || 'TestPassword123!';
-const VALID_USERNAME = process.env.VALID_USERNAME || 'simonslavik001';
-
-  /**
- * @param {import('@playwright/test').Page} page
- */
-// Helper to login
-async function login(page) {
-  await page.goto('https://mastodon.social/auth/sign_in');
-  await page.waitForLoadState('networkidle');
-  
-  const emailInput = page.locator('input[type="email"], input[name*="email"]').first();
-  await emailInput.waitFor({ state: 'visible', timeout: 2000 });
-  await emailInput.click();
-  await page.waitForTimeout(200);
-  await emailInput.fill(VALID_EMAIL);
-  await page.waitForTimeout(100);
-
-  const passwordInput = page.locator('input[type="password"]');
-  await passwordInput.waitFor({ state: 'visible', timeout: 2000 });
-  await passwordInput.click();
-  await page.waitForTimeout(200);
-  await passwordInput.fill(VALID_PASSWORD);
-  await page.waitForTimeout(100);
-
-  await page.getByRole('button', { name: "Log in" }).click();
-  await page.waitForLoadState('networkidle');
-  await page.waitForTimeout(2000);
-}
-
+const VALID_EMAIL = process.env.EXISTING_EMAIL || ""
+const VALID_PASSWORD = process.env.VALID_PASSWORD || ""
+const VALID_USERNAME = process.env.VALID_USERNAME || ""
 
 test.describe('Search Function Tests', () => {
   // Login once before all tests in this suite
@@ -41,7 +16,11 @@ test.describe('Search Function Tests', () => {
     const context = await browser.newContext();
     const page = await context.newPage();
     
-    await login(page);
+    const loginPage = new LoginPage(page);
+    await loginPage.goto();
+    await loginPage.fillEmail(VALID_EMAIL);
+    await loginPage.fillPassword(VALID_PASSWORD);
+    await loginPage.clickLogin();
     
     // Save auth state
     await context.storageState({ path: 'auth.json' });
@@ -61,28 +40,17 @@ test.describe('Search Function Tests', () => {
     }
     
     // Navigate to home timeline
-    await page.goto('https://mastodon.social/home', { waitUntil: 'domcontentloaded' });
-    await page.waitForLoadState('networkidle');
-    await page.waitForLoadState('load');
-    await page.waitForTimeout(1500); // Extra wait to ensure page is fully loaded
+    const homePage = new HomePage(page);
+    await homePage.goto();
   });
 
 
 test('Test Case 5.1.1: Search by Username', async ({ page }) => {
-    await page.pause();
+    const searchPage = new SearchPage(page);
 
-  // Click search bar at top
-  const searchInput = page.getByRole('textbox', { name: 'Search or paste URL' });
-  await searchInput.click();
-  await page.waitForTimeout(200);
-
-  // Type username to search (with @ prefix)
-  await searchInput.fill('@' + VALID_USERNAME);
-  await page.waitForTimeout(1000); // Wait for search results to populate
-
-  // Press Enter to perform search
-  await searchInput.press('Enter');
-  await page.waitForLoadState('networkidle');
+  // Use the search page object
+  await searchPage.fillSearch('@' + VALID_USERNAME);
+  await searchPage.submitSearch();
 
   // Verify that user appears in search results
   // Look for the username in results
@@ -91,18 +59,13 @@ test('Test Case 5.1.1: Search by Username', async ({ page }) => {
 });
 
 test('Test Case 5.1.2: Search by Hashtag', async ({ page }) => {
-  // Click search bar
-  const searchInput = page.getByRole('textbox', { name: 'Search or paste URL' });
-  await searchInput.click();
-  await page.waitForTimeout(200);
-
+  const searchPage = new SearchPage(page);
+  
   // Type hashtag
-  await searchInput.fill('#photography');
-  await page.waitForTimeout(500);
+  await searchPage.fillSearch('#photography');
 
   // Press Enter to search
-  await searchInput.press('Enter');
-  await page.waitForLoadState('networkidle');
+  await searchPage.submitSearch();
 
   // Verify search results are displayed
   const searchResults = page.locator('[class*="search"], [class*="results"]');
@@ -110,18 +73,13 @@ test('Test Case 5.1.2: Search by Hashtag', async ({ page }) => {
 });
 
 test('Test Case 5.1.3: Search by URL/Domain', async ({ page }) => {
-  // Click search bar
-  const searchInput = page.getByRole('textbox', { name: 'Search or paste URL' });
-  await searchInput.click();
-  await page.waitForTimeout(200);
+  const searchPage = new SearchPage(page);
 
   // Type URL/domain
-  await searchInput.fill('example.com');
-  await page.waitForTimeout(500);
+  await searchPage.fillSearch('example.com');
 
   // Press Enter to search
-  await searchInput.press('Enter');
-  await page.waitForLoadState('networkidle');
+  await searchPage.submitSearch();
 
   // Verify search results are displayed
   const searchResults = page.locator('[class*="search"], [class*="results"]');
@@ -129,27 +87,22 @@ test('Test Case 5.1.3: Search by URL/Domain', async ({ page }) => {
 });
 
 test('Test Case 5.1.4: Search Results - Tabs (Posts, People, Hashtags)', async ({ page }) => {
-  // Click search bar
-  const searchInput = page.getByRole('textbox', { name: 'Search or paste URL' });
-  await searchInput.click();
-  await page.waitForTimeout(200);
+  const searchPage = new SearchPage(page);
 
   // Perform a search
-  await searchInput.fill('test');
-  await page.waitForTimeout(500);
-  await searchInput.press('Enter');
-  await page.waitForLoadState('networkidle');
+  await searchPage.fillSearch('test');
+  await searchPage.submitSearch();
 
   // Check for Posts tab
-  const postsTab = page.getByRole('button', { name: /posts/i });
+  const postsTab = searchPage.postsTab;
   await expect(postsTab).toBeTruthy();
 
   // Check for People/Profiles tab
-  const peopleTab = page.getByRole('button', { name: /people|profiles/i });
+  const peopleTab = searchPage.peopleTab;
   await expect(peopleTab).toBeTruthy();
 
   // Check for Hashtags tab
-  const hashtagsTab = page.getByRole('button', { name: /hashtags/i });
+  const hashtagsTab = searchPage.hashtagsTab;
   await expect(hashtagsTab).toBeTruthy();
 
   // Click People tab to verify it works
@@ -158,31 +111,21 @@ test('Test Case 5.1.4: Search Results - Tabs (Posts, People, Hashtags)', async (
 });
 
 test('Test Case 5.1.5: Search - No Results', async ({ page }) => {
-  // Click search bar
-  const searchInput = page.getByRole('textbox', { name: 'Search or paste URL' });
-  await searchInput.click();
-  await page.waitForTimeout(200);
+  const searchPage = new SearchPage(page);
 
   // Search for non-existent term
-  await searchInput.fill('xyzabc123nonexistent');
-  await page.waitForTimeout(500);
-  await searchInput.press('Enter');
-  await page.waitForLoadState('networkidle');
+  await searchPage.fillSearch('xyzabc123nonexistent');
+  await searchPage.submitSearch();
 
   // Verify "No results" message is displayed
-  const noResultsMessage = page.locator('text=/No results|nothing found/i');
-  await expect(noResultsMessage).toBeVisible();
+  await expect(searchPage.noResultsMessage).toBeVisible();
 });
 
 test('Test Case 5.1.6: Search History', async ({ page }) => {
-  // Click search bar
-  const searchInput = page.getByRole('textbox', { name: 'Search or paste URL' });
-  await searchInput.click();
-  await page.waitForTimeout(200);
+  const searchPage = new SearchPage(page);
 
   // Clear any existing search input to trigger history view
-  await searchInput.fill('');
-  await page.waitForTimeout(500);
+  await searchPage.fillSearch('');
 
   // Look for recent searches section
   const recentSearches = page.locator('text=/recent|history/i');

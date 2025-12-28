@@ -1,69 +1,14 @@
 // @ts-check
 import { test, expect } from '@playwright/test';
+import { HomePage } from '../pages/HomePage.js';
+import { LoginPage } from '../pages/LoginPage.js';
+import { login, fillComposeText, submitCompose } from '../utils/testHelpers.js';
 import 'dotenv/config';
 
 // Test credentials
-const VALID_EMAIL = process.env.EXISTING_EMAIL || 'simonslavik001@gmail.com';
-const VALID_PASSWORD = process.env.VALID_PASSWORD || 'TestPassword123!';
-const VALID_USERNAME = process.env.VALID_USERNAME || 'simonslavik001';
-
-  /**
- * @param {import('@playwright/test').Page} page
- */
-// Helper to login
-async function login(page) {
-  await page.goto('https://mastodon.social/auth/sign_in');
-  await page.waitForLoadState('networkidle');
-  
-  const emailInput = page.locator('input[type="email"], input[name*="email"]').first();
-  await emailInput.waitFor({ state: 'visible', timeout: 2000 });
-  await emailInput.click();
-  await page.waitForTimeout(200);
-  await emailInput.fill(VALID_EMAIL);
-  await page.waitForTimeout(100);
-
-  const passwordInput = page.locator('input[type="password"]');
-  await passwordInput.waitFor({ state: 'visible', timeout: 2000 });
-  await passwordInput.click();
-  await page.waitForTimeout(200);
-  await passwordInput.fill(VALID_PASSWORD);
-  await page.waitForTimeout(100);
-
-  await page.getByRole('button', { name: "Log in" }).click();
-  await page.waitForLoadState('networkidle');
-  await page.waitForTimeout(2000);
-}
- /**
- * @param {import('@playwright/test').Page} page
- */
-
- /**
- * @param {import('@playwright/test').Page} page
- * @param {string} text
- */
-// Helper to fill compose text
-async function fillComposeText(page, text) {
-  const textarea = page.getByRole('textbox', { name: 'What\'s on your mind?' }).first();
-  await textarea.waitFor({ state: 'visible', timeout: 2000 });
-  await textarea.click();
-  await page.waitForTimeout(300);
-  await textarea.fill(text);
-  await page.waitForTimeout(300);
-}
- /**
- * @param {import('@playwright/test').Page} page
- */
-// Helper to submit compose
-async function submitCompose(page) {
-  await page.keyboard.press('Escape');
-  await page.waitForTimeout(300);
-  
-  const submitButton = page.getByRole('button', { name: 'Post' }).first();
-  await submitButton.waitFor({ state: 'visible', timeout: 2000 });
-  await submitButton.click({ force: true });
-  await page.waitForLoadState('networkidle');
-  await page.waitForTimeout(2000);
-}
+const VALID_EMAIL = process.env.EXISTING_EMAIL || ""
+const VALID_PASSWORD = process.env.VALID_PASSWORD || ""
+const VALID_USERNAME = process.env.VALID_USERNAME || ""
 
 test.describe('Create Toot Tests', () => {
   // Login once before all tests in this suite
@@ -71,7 +16,14 @@ test.describe('Create Toot Tests', () => {
     const context = await browser.newContext();
     const page = await context.newPage();
     
-    await login(page);
+    const loginPage = new LoginPage(page);
+    const email = VALID_EMAIL;
+    const password = VALID_PASSWORD;
+    
+    await loginPage.goto();
+    await loginPage.fillEmail(email);
+    await loginPage.fillPassword(password);
+    await loginPage.clickLogin();
     
     // Save auth state
     await context.storageState({ path: 'auth.json' });
@@ -91,16 +43,14 @@ test.describe('Create Toot Tests', () => {
     }
     
     // Navigate to home timeline
-    await page.goto('https://mastodon.social/home', { waitUntil: 'domcontentloaded' });
-    await page.waitForLoadState('networkidle');
-    await page.waitForLoadState('load');
-    await page.waitForTimeout(500);
+    const homePage = new HomePage(page);
+    await homePage.goto();
     
     // Wait for compose box to be ready - with retry logic
     let composeBoxReady = false;
     for (let i = 0; i < 3; i++) {
       try {
-        const composeBox = page.getByRole('textbox', { name: 'What\'s on your mind?' }).first();
+        const composeBox = homePage.getComposeInput();
         await composeBox.waitFor({ state: 'visible', timeout: 2000 });
         composeBoxReady = true;
         break;

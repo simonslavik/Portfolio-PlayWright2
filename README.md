@@ -35,44 +35,44 @@ This test suite automates critical user workflows on Mastodon.social including:
 ### Authentication Tests (7 tests)
 | Test Case | Description | Status |
 |-----------|-------------|--------|
-| 1.1.1 | Successful login with email | ✅ Automated |
-| 1.1.2 | Login with invalid email | ✅ Automated |
-| 1.1.3 | Login with incorrect password | ✅ Automated |
-| 1.1.4 | Login with empty credentials | ✅ Automated |
-| 1.2.1 | Successful user registration | ✅ Automated |
-| 1.2.2 | Email already exists error | ✅ Automated |
-| 1.3.1 | Logout functionality | ✅ Automated |
+| 1.1.1 | Successful login with email | Automated |
+| 1.1.2 | Login with invalid email | Automated |
+| 1.1.3 | Login with incorrect password | Automated |
+| 1.1.4 | Login with empty credentials | Automated |
+| 1.2.1 | Successful user registration | Automated |
+| 1.2.2 | Email already exists error | Automated |
+| 1.3.1 | Logout functionality | Automated |
 
 ### Content Creation Tests (7 tests)
 | Test Case | Description | Status |
 |-----------|-------------|--------|
-| 2.1.1 | Create text toot | ✅ Automated |
-| 2.1.5 | Create toot with mentions | ✅ Automated |
-| 2.1.6 | Create toot with content warning | ✅ Automated |
-| 2.1.9 | Empty toot error handling | ✅ Automated |
-| 2.1.10 | 500 character limit validation | ✅ Automated |
-| 2.2.1 | Edit toot successfully | ✅ Automated |
-| 2.3.1 | Delete own toot | ✅ Automated |
+| 2.1.1 | Create text toot | Automated |
+| 2.1.5 | Create toot with mentions | Automated |
+| 2.1.6 | Create toot with content warning | Automated |
+| 2.1.9 | Empty toot error handling | Automated |
+| 2.1.10 | 500 character limit validation | Automated |
+| 2.2.1 | Edit toot successfully | Automated |
+| 2.3.1 | Delete own toot | Automated |
 
 ### Search Tests (6 tests)
 | Test Case | Description | Status |
 |-----------|-------------|--------|
-| 5.1.1 | Search by username | ✅ Automated |
-| 5.1.2 | Search by hashtag | ✅ Automated |
-| 5.1.3 | Search by URL/domain | ✅ Automated |
-| 5.1.4 | Search results tabs | ✅ Automated |
-| 5.1.5 | No results handling | ✅ Automated |
-| 5.1.6 | Search history | ✅ Automated |
+| 5.1.1 | Search by username | Automated |
+| 5.1.2 | Search by hashtag | Automated |
+| 5.1.3 | Search by URL/domain | Automated |
+| 5.1.4 | Search results tabs | Automated |
+| 5.1.5 | No results handling | Automated |
+| 5.1.6 | Search history | Automated |
 
 ### Interaction Tests (7 tests)
 | Test Case | Description | Status |
 |-----------|-------------|--------|
-| 3.1.1 | Like a toot | ✅ Automated |
-| 3.1.2 | Unlike a toot | ✅ Automated |
-| 3.2.1 | Repost a toot | ✅ Automated |
-| 3.2.2 | Remove repost | ✅ Automated |
-| 3.3.1 | Bookmark a toot | ✅ Automated |
-| 3.4.1 | Reply to toot | ✅ Automated |
+| 3.1.1 | Like a toot | Automated |
+| 3.1.2 | Unlike a toot | Automated |
+| 3.2.1 | Repost a toot | Automated |
+| 3.2.2 | Remove repost | Automated |
+| 3.3.1 | Bookmark a toot | Automated |
+| 3.4.1 | Reply to toot | Automated |
 
 **Total: 27+ automated test cases**
 

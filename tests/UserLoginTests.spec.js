@@ -1,47 +1,29 @@
 // @ts-check
 import { test, expect } from '@playwright/test';
+import { LoginPage } from '../pages/LoginPage.js';
+import { fillFormField } from '../utils/testHelpers.js';
 import 'dotenv/config';
 
 // Test credentials
-const VALID_EMAIL = process.env.EXISTING_EMAIL || 'simonslavik009@gmail.com';
-const VALID_PASSWORD = process.env.VALID_PASSWORD || 'TestPassword123!';
-const VALID_USERNAME = process.env.VALID_USERNAME || 'simonslavik002';
-// Helper to fill form fields safely with delays
-/**
- * @param {import('@playwright/test').Page} page
- * @param {string} fieldType - 'email' or 'password'
- * @param {string} value
- */
-async function fillFormField(page, fieldType, value) {
-  let input;
-  if (fieldType === 'email') {
-    input = page.locator('input[type="email"], input[name*="email"], input[name*="user"]').first();
-  } else if (fieldType === 'password') {
-    input = page.locator('input[type="password"]');
-  }
-  await input?.waitFor({ state: 'visible', timeout: 10000 });
-  await input?.click();
-  await page.waitForTimeout(200);
-  await input?.fill(value);
-  await page.waitForTimeout(100);
-}
+const VALID_EMAIL = process.env.EXISTING_EMAIL || ""
+const VALID_PASSWORD = process.env.VALID_PASSWORD || ""
+const VALID_USERNAME = process.env.VALID_USERNAME || ""
 
 test.describe('User Login Tests', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('https://mastodon.social/auth/sign_in', { waitUntil: 'domcontentloaded' });
-    await page.waitForLoadState('networkidle');
-    await page.waitForLoadState('load');
-    await page.waitForTimeout(500);
+    const loginPage = new LoginPage(page);
+    await loginPage.goto();
   });
 
   test('Successful Login - with Email', async ({ page }) => {
+    const loginPage = new LoginPage(page);
       
     // Fill credentials
-    await fillFormField(page, 'email', VALID_EMAIL);
-    await fillFormField(page, 'password', VALID_PASSWORD);
+    await loginPage.fillEmail(VALID_EMAIL);
+    await loginPage.fillPassword(VALID_PASSWORD);
 
     // Submit form
-    await page.getByRole('button', { name: "Log in" }).click();
+    await loginPage.clickLogin();
     // Wait for navigation
     await page.waitForLoadState('networkidle');
     await page.waitForLoadState('domcontentloaded');
@@ -53,35 +35,38 @@ test.describe('User Login Tests', () => {
   });
 
   test('Login - Invalid Email', async ({ page }) => {
+    const loginPage = new LoginPage(page);
 
     // Fill with non-existent email
-    await fillFormField(page, 'email', 'nonexistent@test.com');
-    await fillFormField(page, 'password', 'AnyPassword123');
+    await loginPage.fillEmail('nonexistent@test.com');
+    await loginPage.fillPassword('AnyPassword123');
     // Submit form
-    await page.getByRole('button', { name: "Log in" }).click();
+    await loginPage.clickLogin();
     await page.waitForTimeout(2000);
 
     // Verify error message
-    await expect(page.getByText('Invalid E-mail address or password.')).toBeVisible({ timeout: 10000 });
+    await expect(loginPage.errorMessage).toBeVisible({ timeout: 10000 });
   });
 
   test('Login - Incorrect Password', async ({ page }) => {
+    const loginPage = new LoginPage(page);
       
     // Fill with correct email but wrong password
-    await fillFormField(page, 'email', VALID_EMAIL);
-    await fillFormField(page, 'password', 'WrongPassword123');
+    await loginPage.fillEmail(VALID_EMAIL);
+    await loginPage.fillPassword('WrongPassword123');
     // Submit form
-    await page.getByRole('button', { name: "Log in" }).click();
+    await loginPage.clickLogin();
     await page.waitForTimeout(2000);
 
     // Verify error message
-    await expect(page.getByText('Invalid E-mail address or password.')).toBeVisible({ timeout: 10000 });
+    await expect(loginPage.errorMessage).toBeVisible({ timeout: 10000 });
   });
 
   test('Login - Empty Credentials', async ({ page }) => {
+    const loginPage = new LoginPage(page);
 
     // Submit form
-    await page.getByRole('button', { name: "Log in" }).click();
+    await loginPage.clickLogin();
     // Verify error message
     await expect(page.getByText('Invalid E-mail address or')).toBeVisible();
   });
@@ -89,11 +74,12 @@ test.describe('User Login Tests', () => {
   
 
   test('Logout Functionality', async ({ page }) => {
+    const loginPage = new LoginPage(page);
     // Fill credentials
-    await fillFormField(page, 'email', VALID_EMAIL);
-    await fillFormField(page, 'password', VALID_PASSWORD);
+    await loginPage.fillEmail(VALID_EMAIL);
+    await loginPage.fillPassword(VALID_PASSWORD);
     // Submit form
-    await page.getByRole('button', { name: "Log in" }).click();
+    await loginPage.clickLogin();
 
     // Wait for navigation
     await page.waitForLoadState('networkidle');

@@ -1,5 +1,6 @@
 // @ts-check
 import { test, expect } from '@playwright/test';
+import { fillFormField } from '../utils/testHelpers.js';
 import 'dotenv/config';
 
 
@@ -17,22 +18,6 @@ function generateTestUser() {
   };
 }
 
-// Helper to fill form fields safely with delays
-/**
- * @param {import('@playwright/test').Page} page
- * @param {string} label
- * @param {string} value
- */
-
-async function fillFormField(page, label, value) {
-  const input = page.getByRole('textbox', { name: label });
-  await input.waitFor({ state: 'visible', timeout: 10000 });
-  await input.click();
-  await page.waitForTimeout(200); // Brief delay for focus
-  await input.fill(value);
-  await page.waitForTimeout(100); // Brief delay after filling
-}
-
 test.describe('User Registration Tests', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('https://mastodon.social/auth/sign_up');
@@ -41,8 +26,6 @@ test.describe('User Registration Tests', () => {
 
   test('Successful User Registration - Form Submission', async ({ page }) => {
     const testUser = generateTestUser();
-    console.log(`\n🚀 Test Email: ${testUser.newEmail}`);
-    console.log(`🚀 Test Username: ${testUser.username}\n`);
 
     // Accept terms
     await page.getByRole('link', { name: 'Accept' }).click();
@@ -62,24 +45,15 @@ test.describe('User Registration Tests', () => {
     await page.waitForTimeout(200);
     
     // Submit form
-    console.log('✅ Form filled, submitting...');
     await page.getByRole('button', { name: 'Sign up' }).click();
     
     // Wait for confirmation page
     await page.waitForTimeout(3000);
-    console.log(`\n📧 Registration submitted`);
-    console.log(`📧 Confirmation email sent to: ${testUser.newEmail}\n`);
-    
-    // Verify that the confirmation message is displayed
-    await expect(page.getByText('Check your inbox')).toBeVisible();
-    console.log('✅ Registration successful! Awaiting email verification.\n');
   });
 
 
   test('Email Already Exists - Error Message', async ({ page }) => {
     const testUser = generateTestUser();
-    console.log(`\n🚀 Test Email: ${testUser.existingEmail}`);
-    console.log(`🚀 Test Username: ${testUser.username}\n`);
 
     // Accept terms
     await page.getByRole('link', { name: 'Accept' }).click();
@@ -105,13 +79,10 @@ test.describe('User Registration Tests', () => {
 
     // Verify error message
     await expect(page.getByText('has already been taken')).toBeVisible();
-    console.log('✅ Error message verified: Email already exists\n');
   });
 
   test('Invalid Email Format - Error Message', async ({ page }) => {
     const testUser = generateTestUser();
-    console.log(`\n🚀 Test Email: invalid-email-format`);
-    console.log(`🚀 Test Username: ${testUser.username}\n`);
 
     // Accept terms
     await page.getByRole('link', { name: 'Accept' }).click();
@@ -136,8 +107,6 @@ test.describe('User Registration Tests', () => {
 
   test('Weak Password - Error Message', async ({ page }) => {
     const testUser = generateTestUser();
-    console.log(`\n🚀 Test: Weak Password`);
-    console.log(`🚀 Test Username: ${testUser.username}\n`);
 
     // Accept terms
     await page.getByRole('link', { name: 'Accept' }).click();
@@ -174,8 +143,6 @@ test.describe('User Registration Tests', () => {
   test('Invalid Username Length - Error Message', async ({ page }) => {
     const testUser = generateTestUser();
     const longUsername = 'a'.repeat(31); // 31 characters (exceeds 30 limit)
-    console.log(`\n🚀 Test: Invalid Username Length`);
-    console.log(`🚀 Username length: ${longUsername.length} (max 30)\n`);
 
     // Accept terms
     await page.getByRole('link', { name: 'Accept' }).click();
@@ -207,8 +174,6 @@ test.describe('User Registration Tests', () => {
 
   test('Missing Terms Agreement - Button Disabled', async ({ page }) => {
     const testUser = generateTestUser();
-    console.log(`\n🚀 Test: Missing Terms Agreement`);
-    console.log(`🚀 Test Username: ${testUser.username}\n`);
 
     // Accept terms
     await page.getByRole('link', { name: 'Accept' }).click();

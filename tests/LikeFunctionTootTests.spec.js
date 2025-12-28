@@ -1,94 +1,15 @@
 import {test, expect} from '@playwright/test';
+import { HomePage } from '../pages/HomePage.js';
+import { LoginPage } from '../pages/LoginPage.js';
+import { fillComposeText, submitCompose } from '../utils/testHelpers.js';
 import 'dotenv/config';
 
 
-// Helper to fill form fields safely with delays
-/**
- * @param {import('@playwright/test').Page} page
- * @param {string} label
- * @param {string} value
- */
-
-
 // Test credentials
-const VALID_EMAIL = process.env.EXISTING_EMAIL || 'simonslavik001@gmail.com';
-const VALID_PASSWORD = process.env.VALID_PASSWORD || 'TestPassword123!';
-const VALID_USERNAME = process.env.VALID_USERNAME || 'simonslavik001';
+const VALID_EMAIL = process.env.EXISTING_EMAIL || ""
+const VALID_PASSWORD = process.env.VALID_PASSWORD || ""
+const VALID_USERNAME = process.env.VALID_USERNAME || ""
 let newTootId = 0;
-
-  /**
- * @param {import('@playwright/test').Page} page
- */
-
-
-// Helper to fill compose text
-async function fillComposeText(page, text) {
-  const textarea = page.getByRole('textbox', { name: 'What\'s on your mind?' }).first();
-  await textarea.waitFor({ state: 'visible', timeout: 10000 });
-  await textarea.click();
-  await page.waitForTimeout(300);
-  await textarea.fill(text);
-  await page.waitForTimeout(300);
-}
- /**
- * @param {import('@playwright/test').Page} page
- */
-// Helper to submit compose
-async function submitCompose(page) {
-  // Close any open autocomplete/suggestion popups by pressing Escape
-  await page.keyboard.press('Escape');
-  await page.waitForTimeout(300);
-  
-  const submitButton = page.getByRole('button', { name: 'Post' }).first();
-  await submitButton.waitFor({ state: 'visible', timeout: 5000 });
-  
-  // Click with force to bypass any overlay issues
-  await submitButton.click({ force: true });
-  await page.waitForLoadState('networkidle');
-  await page.waitForTimeout(2000);
-}
-
-
-// Helper to login
-async function login(page) {
-  await page.goto('https://mastodon.social/auth/sign_in');
-  await page.waitForLoadState('networkidle');
-  
-  const emailInput = page.locator('input[type="email"], input[name*="email"]').first();
-  await emailInput.waitFor({ state: 'visible', timeout: 2000 });
-  await emailInput.click();
-  await page.waitForTimeout(200);
-  await emailInput.fill(VALID_EMAIL);
-  await page.waitForTimeout(100);
-
-  const passwordInput = page.locator('input[type="password"]');
-  await passwordInput.waitFor({ state: 'visible', timeout: 2000 });
-  await passwordInput.click();
-  await page.waitForTimeout(200);
-  await passwordInput.fill(VALID_PASSWORD);
-  await page.waitForTimeout(100);
-
-  await page.getByRole('button', { name: "Log in" }).click();
-  await page.waitForLoadState('networkidle');
-  await page.waitForTimeout(2000);
-}
-
-
-async function createToot(page, content) {
-  // Fill in the toot content
-  await fillComposeText(page, content);
-  // Submit the toot
-  await submitCompose(page);
-};
-
- /**
- * @param {import('@playwright/test').Page} page
- */
-
- /**
- * @param {import('@playwright/test').Page} page
- * @param {string} text
- */
 
 
 test.describe('Like/Unlike Toot Tests', () => {
@@ -99,17 +20,25 @@ test.describe('Like/Unlike Toot Tests', () => {
     const context = await browser.newContext();
     const page = await context.newPage();
     
-    await login(page);
+    const loginPage = new LoginPage(page);
+    await loginPage.goto();
+    await loginPage.fillEmail(VALID_EMAIL);
+    await loginPage.fillPassword(VALID_PASSWORD);
+    await loginPage.clickLogin();
     
     // Save auth state
     await context.storageState({ path: 'auth.json' });
-    await createToot(page, 'This is a test toot for like/unlike functionality. #testing');
+    
+    // Create a toot for testing
+    const homePage = new HomePage(page);
+    await homePage.goto();
+    await fillComposeText(page, 'This is a test toot for like/unlike functionality. #testing');
+    await submitCompose(page);
     
     // Wait for the toot to appear and capture its ID
     const newToot = page.locator('article').first();
     await newToot.waitFor({ state: 'visible', timeout: 5000 });
     newTootId = await newToot.getAttribute('data-id');
-    console.log('Created toot with ID:', newTootId);
     
     await context.close();
   });
@@ -127,16 +56,14 @@ test.describe('Like/Unlike Toot Tests', () => {
     }
     
     // Navigate to home timeline
-    await page.goto('https://mastodon.social/home', { waitUntil: 'domcontentloaded' });
-    await page.waitForLoadState('networkidle');
-    await page.waitForLoadState('load');
-    await page.waitForTimeout(500);
+    const homePage = new HomePage(page);
+    await homePage.goto();
     
     // Wait for compose box to be ready - with retry logic
     let composeBoxReady = false;
     for (let i = 0; i < 3; i++) {
       try {
-        const composeBox = page.getByRole('textbox', { name: 'What\'s on your mind?' }).first();
+        const composeBox = homePage.getComposeInput();
         await composeBox.waitFor({ state: 'visible', timeout: 8000 });
         composeBoxReady = true;
         break;
